@@ -133,9 +133,11 @@ namespace Kage {
     void Canva::Rotate90(Point p1, Point p2) {
         for(auto& i: _contours) {
             if(isInside(i, p1, p2)) {
-                for(auto& j: i.Points())
-                    j.x = std::floor((p1.x + (p2.y - j.y)) * 10) / 10,
-                    j.y = std::floor((p1.y + (j.x - p1.x)) * 10) / 10;
+                for(auto& j: i.Points()) {
+                    auto x = j.x, y = j.y;
+                    j.x = std::floor((p1.x + (p2.y - y)) * 10) / 10,
+                    j.y = std::floor((p1.y + (x - p1.x)) * 10) / 10;
+                }
             }
         }
     }
@@ -144,9 +146,11 @@ namespace Kage {
     void Canva::Rotate180(Point p1, Point p2) {
         for(auto& i: _contours) {
             if(isInside(i, p1, p2)) {
-                for(auto& j: i.Points())
-                    j.x = std::floor((p2.x - (j.x - p1.x)) * 10) / 10,
-                    j.y = std::floor((p2.y - (j.y - p1.y)) * 10) / 10;
+                for(auto& j: i.Points()) {
+                    auto x = j.x, y = j.y;
+                    j.x = std::floor((p2.x - (x - p1.x)) * 10) / 10,
+                    j.y = std::floor((p2.y - (y - p1.y)) * 10) / 10;
+                }
             }
         }
     }
@@ -155,9 +159,11 @@ namespace Kage {
     void Canva::Rotate270(Point p1, Point p2) {
         for(auto& i: _contours) {
             if(isInside(i, p1, p2)) {
-                for(auto& j: i.Points())
-                    j.x = std::floor((p1.x + (j.y - p1.y)) * 10) / 10,
-                    j.y = std::floor((p2.y + (j.x - p1.x)) * 10) / 10;
+                for(auto& j: i.Points()) {
+                    auto x = j.x, y = j.y;
+                    j.x = std::floor((p1.x + (y - p1.y)) * 10) / 10,
+                    j.y = std::floor((p2.y - (x - p1.x)) * 10) / 10;
+                }
             }
         }
     }
