@@ -50,6 +50,8 @@ namespace Kage {
         void                SetNotDefGlyph(std::vector<Stroke> glyph);
         void                MakeGlyph(Canva& canva, std::string buhin);
         void                MakeGlyph2(Canva& canva, std::vector<Stroke> data);
+        std::vector<std::vector<Canva>> MakeGlyphSeparatedOut(
+            std::vector<Stroke> data);
         std::vector<Stroke> ExtractGlyph(std::string buhin);
         std::vector<Stroke> ExtractGlyph2(std::vector<Stroke> data);
         CheckGlyphState     CheckGlyph(std::string buhin);

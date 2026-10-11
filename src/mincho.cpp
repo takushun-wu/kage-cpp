@@ -1570,4 +1570,27 @@ namespace Kage {
         return cv;
     }
 
+    // Same context as DrawGlyph, but each stroke gets its own Canva.
+    std::vector<Canva> Mincho::DrawGlyphSeparated(
+        std::vector<Stroke> strokes) {
+        std::vector<Canva> result;
+        for(size_t i = 0; i < strokes.size(); i++) {
+            Canva cv;
+            if(strokes[i].type == STROKE_SPECIAL) {
+                // Flip/rotate acts on everything drawn so far; the Canva
+                // transforms work contour by contour, so applying them to
+                // each earlier stroke's Canva equals applying them to the
+                // whole glyph's Canva in DrawGlyph.
+                for(auto& prev: result)
+                    DrawAdjustedStroke(prev, strokes[i], {});
+            } else {
+                auto tempdata = strokes;
+                tempdata.erase(tempdata.begin() + i);
+                DrawAdjustedStroke(cv, strokes[i], tempdata);
+            }
+            result.push_back(cv);
+        }
+        return result;
+    }
+
 } // namespace Kage

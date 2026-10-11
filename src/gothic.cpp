@@ -189,4 +189,23 @@ namespace Kage {
         return cv;
     }
 
+    // Same as DrawGlyph, but each stroke gets its own Canva.
+    std::vector<Canva> Gothic::DrawGlyphSeparated(
+        std::vector<Stroke> strokes) {
+        std::vector<Canva> result;
+        for(auto stroke: strokes) {
+            Canva cv;
+            if(stroke.type == STROKE_SPECIAL) {
+                // Flip/rotate acts on everything drawn so far (see
+                // Mincho::DrawGlyphSeparated).
+                for(auto& prev: result)
+                    DrawStroke(prev, stroke);
+            } else {
+                DrawStroke(cv, stroke);
+            }
+            result.push_back(cv);
+        }
+        return result;
+    }
+
 } // namespace Kage
