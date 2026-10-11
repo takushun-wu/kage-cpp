@@ -1174,7 +1174,7 @@ namespace Kage {
                 Contour    poly_end(2);
                 const auto param_tate    = AdjustTateParam(s, others);
                 const auto kMinWidthT_m  = kMinWidthT - param_tate / 2;
-                bool       connectVerror = false;  // Modified(2025/8/28),为表现与原版kage一致
+                bool       connectVerror = false; // mod,为表现与原版kage一致
                 // 头部
                 auto poly_start =
                     GetStartOfVLine(s.p1, s.p2, s.start, kMinWidthT_m, cv);
@@ -1265,7 +1265,7 @@ namespace Kage {
                 case END_CONNECTING_V: {
                     if(s.p1.y == s.p2.y) { // horizontal (error)
                         // cv.DrawLine(s.p1, s.p2, kMinWidthT_m);
-                        cv.DrawLine(s.p1, s.p2, kMinWidthYY);  // Modified(2025/8/28)
+                        cv.DrawLine(s.p1, s.p2, kMinWidthYY); // mod
                         connectVerror = true;
                     } else if(s.p1.x == s.p2.x) { // vertical
                         poly_end.Set(0,
@@ -1294,7 +1294,7 @@ namespace Kage {
                         DrawLowerRightHT(cv, s.p2, kMinWidthT_m, kMinWidthY);
                     if(s.p1.y == s.p2.y) { // horizontal (error)
                         // cv.DrawLine(s.p1, s.p2, kMinWidthT_m);
-                        cv.DrawLine(s.p1, s.p2, kMinWidthYY);  // Modified(2025/8/28)
+                        cv.DrawLine(s.p1, s.p2, kMinWidthYY); // mod
                         connectVerror = true;
                     } else if(s.p1.x == s.p2.x) { // vertical
                         poly_end.Set(0,
@@ -1317,7 +1317,7 @@ namespace Kage {
                 default: break;
                 }
                 // 直线部分
-                if(!connectVerror) {  // Modified(2025/8/28)
+                if(!connectVerror) { // mod
                     poly_start.Concat(poly_end);
                     cv.Push(poly_start);
                 }
@@ -1570,23 +1570,19 @@ namespace Kage {
         return cv;
     }
 
-    // Same context as DrawGlyph, but each stroke gets its own Canva.
-    std::vector<Canva> Mincho::DrawGlyphSeparated(
-        std::vector<Stroke> strokes) {
+    std::vector<Canva> Mincho::DrawGlyphSeparated(std::vector<Stroke> strokes) {
         std::vector<Canva> result;
+        result.reserve(strokes.size());
         for(size_t i = 0; i < strokes.size(); i++) {
             Canva cv;
             if(strokes[i].type == STROKE_SPECIAL) {
-                // Flip/rotate acts on everything drawn so far; the Canva
-                // transforms work contour by contour, so applying them to
-                // each earlier stroke's Canva equals applying them to the
-                // whole glyph's Canva in DrawGlyph.
-                for(auto& prev: result)
-                    DrawAdjustedStroke(prev, strokes[i], {});
+                // Flip/rotate commands transform all strokes already drawn.
+                for(auto& previous: result)
+                    DrawAdjustedStroke(previous, strokes[i], {});
             } else {
-                auto tempdata = strokes;
-                tempdata.erase(tempdata.begin() + i);
-                DrawAdjustedStroke(cv, strokes[i], tempdata);
+                auto otherStrokes = strokes;
+                otherStrokes.erase(otherStrokes.begin() + i);
+                DrawAdjustedStroke(cv, strokes[i], otherStrokes);
             }
             result.push_back(cv);
         }

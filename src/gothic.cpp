@@ -82,7 +82,7 @@ namespace Kage {
             else if(s.spe1 == SPECIAL1_ROTATE && s.spe2 == SPECIAL2_ROTATE_270)
                 cv.Rotate270(s.p1, s.p2);
             break;
-        } // Modified(2025/8/28)
+        }
         case STROKE_STRAIGHT: {
             if(s.end == END_TURN_LEFT) {
                 auto pt1 = s.p1.GetExtendedDest(s.p2, -kMage);
@@ -152,7 +152,7 @@ namespace Kage {
                 DrawLine(cv, pt2, s.p3, START_INTERNAL_PLANE, s.end);
             }
             break;
-        } // Modified(2025/8/28)
+        }
         case STROKE_BEZIER: {
             if(s.end == END_TURN_UPWARDS) {
                 auto pt1 = s.p4 - Point(kMage, 0),
@@ -189,17 +189,15 @@ namespace Kage {
         return cv;
     }
 
-    // Same as DrawGlyph, but each stroke gets its own Canva.
-    std::vector<Canva> Gothic::DrawGlyphSeparated(
-        std::vector<Stroke> strokes) {
+    std::vector<Canva> Gothic::DrawGlyphSeparated(std::vector<Stroke> strokes) {
         std::vector<Canva> result;
-        for(auto stroke: strokes) {
+        result.reserve(strokes.size());
+        for(const auto& stroke: strokes) {
             Canva cv;
             if(stroke.type == STROKE_SPECIAL) {
-                // Flip/rotate acts on everything drawn so far (see
-                // Mincho::DrawGlyphSeparated).
-                for(auto& prev: result)
-                    DrawStroke(prev, stroke);
+                // Flip/rotate commands transform all strokes already drawn.
+                for(auto& previous: result)
+                    DrawStroke(previous, stroke);
             } else {
                 DrawStroke(cv, stroke);
             }

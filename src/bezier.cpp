@@ -22,7 +22,7 @@ namespace Kage {
             a2[BEZIER_STEPS - tt] = xy + iab; // reverse
         }
         // bez1 = FitCurve(a1, 0.03), bez2 = FitCurve(a2, 0.03);
-        bez1 = FitCurve(a1, 0.1), bez2 = FitCurve(a2, 0.1); // Modified(2025/8/28)
+        bez1 = FitCurve(a1, 0.1), bez2 = FitCurve(a2, 0.1); // mod
     }
 
     // bezier.js/generalBezier2
@@ -43,7 +43,7 @@ namespace Kage {
             a2[BEZIER_STEPS - tt] = xy + iab; // reverse
         }
         // bez1 = FitCurve(a1, 0.03), bez2 = FitCurve(a2, 0.03);
-        bez1 = FitCurve(a1, 0.1), bez2 = FitCurve(a2, 0.1); // Modified(2025/8/28)
+        bez1 = FitCurve(a1, 0.1), bez2 = FitCurve(a2, 0.1); // mod
     }
 
     // bezier.js/qBezier

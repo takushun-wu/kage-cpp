@@ -1,11 +1,63 @@
 #include "export.h"
 
+#include <chrono>
 #include <cstdio>
+#include <ctime>
 #include <iostream>
+
+#ifdef _WIN32
+#    include <windows.h>
+#else
+#    include <pwd.h>
+#    include <unistd.h>
+#endif
 
 #include "point.h"
 
 namespace Kage {
+
+    namespace {
+
+#ifdef _WIN32
+        std::string WideToUTF8(const WCHAR* value) {
+            int size = WideCharToMultiByte(
+                CP_UTF8, 0, value, -1, nullptr, 0, nullptr, nullptr);
+            if(size <= 1) return "Unknown";
+            std::string out(size, '\0');
+            WideCharToMultiByte(
+                CP_UTF8, 0, value, -1, &out[0], size, nullptr, nullptr);
+            if(!out.empty() && out.back() == '\0') out.pop_back();
+            return out.empty() ? "Unknown" : out;
+        }
+
+        std::string GetUserNameUTF8() {
+            WCHAR buffer[256];
+            DWORD length = sizeof(buffer) / sizeof(buffer[0]);
+            if(GetUserNameW(buffer, &length)) return WideToUTF8(buffer);
+            return "Unknown";
+        }
+
+        std::string GetDeviceNameUTF8() {
+            WCHAR buffer[256];
+            DWORD length = sizeof(buffer) / sizeof(buffer[0]);
+            if(GetComputerNameW(buffer, &length)) return WideToUTF8(buffer);
+            return "Unknown";
+        }
+#else
+        std::string GetUserNameUTF8() {
+            struct passwd* pw = getpwuid(getuid());
+            return pw ? pw->pw_name : "Unknown";
+        }
+
+        std::string GetDeviceNameUTF8() {
+            char hostname[256];
+            if(gethostname(hostname, sizeof(hostname)) == 0)
+                return hostname;
+            return "Unknown";
+        }
+#endif
+
+    } // namespace
 
     // polygon.js/Polygon/get_sub_path_svg
     std::string Contour2SVGstr(Contour contour) {
@@ -130,6 +182,72 @@ namespace Kage {
         }
         buffer += "EndSplineSet\n";
         return buffer;
+    }
+
+    std::string SFDHeader(const std::string& jobname, size_t chars) {
+        std::string out;
+        auto        now      = std::chrono::system_clock::now();
+        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+        std::tm*    local_time = std::localtime(&now_time);
+        auto        epoch =
+            std::chrono::duration_cast<std::chrono::seconds>(
+                now.time_since_epoch())
+                .count();
+        int year = local_time ? 1900 + local_time->tm_year : 1970;
+
+        out += "SplineFontDB: 3.2\n";
+        out += "FontName: " + jobname + "\n";
+        out += "FullName: " + jobname + "\n";
+        out += "FamilyName: " + jobname + "\n";
+        out += "Weight: Regular\n";
+        out += "Copyright: Copyright (c) " + std::to_string(year) + ", " +
+            GetUserNameUTF8() + "@" + GetDeviceNameUTF8() + "\n";
+        out += "Version: 001.000\n";
+        out += "Ascent: 880\n";
+        out += "Descent: 120\n";
+        out += "LayerCount: 2\n";
+        out += "Layer: 0 0 \"Back\" 1\n";
+        out += "Layer: 1 0 \"Fore\" 0\n";
+        out += "CreationTime: " + std::to_string(epoch) + "\n";
+        out += "ModificationTime: " + std::to_string(epoch) + "\n";
+        out += "OS2Vendor: 'PfEd'\n";
+        out += "Encoding: Original\n";
+        out += "Grid\n";
+        out += "42 838 m 1\n";
+        out += " 958 838 l 1\n";
+        out += " 958 -78 l 1\n";
+        out += " 42 -78 l 1\n";
+        out += " 42 838 l 1\n";
+        out += "500 880 m 1\n";
+        out += " 500 -120 l 1025\n";
+        out += "0 380 m 1\n";
+        out += " 1000 380 l 1025\n";
+        out += "EndSplineSet\n";
+        out += "BeginChars: " + std::to_string(chars) + " " +
+            std::to_string(chars) + "\n\n";
+        return out;
+    }
+
+    std::string BuildSFD(
+        const std::string& jobname, const std::vector<SFDGlyph>& glyphs) {
+        std::string out = SFDHeader(jobname, glyphs.size());
+        size_t      charCount = 0;
+        for(const auto& glyph: glyphs) {
+            out += "StartChar: " + glyph.name + "\n";
+            out += "Encoding: " + std::to_string(charCount) + " " +
+                std::to_string(glyph.code) + " " +
+                std::to_string(charCount) + " \n";
+            out += "Width: 1000\n";
+            out += "Flags: HW\n";
+            out += "LayerCount: 2\n";
+            out += "Fore\n";
+            out += glyph.spline;
+            out += "EndChar\n\n";
+            charCount++;
+        }
+        out += "EndChars\n";
+        out += "EndSplineFont\n";
+        return out;
     }
 
 } // namespace Kage

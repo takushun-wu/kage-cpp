@@ -98,6 +98,16 @@ namespace Kage {
             return {};
     }
 
+    bool Kage::DeleteBuhin(std::string name) {
+        return _kageDB.erase(name) != 0;
+    }
+
+    std::map<std::string, std::string> Kage::ExportBuhins() {
+        std::map<std::string, std::string> result;
+        for(const auto& entry: _kageDB)
+            result.emplace(entry.first, StrokesToString(entry.second));
+        return result;
+    }
     // kage.js/Kage/setFont
     void Kage::SetFont(KageFontType type, double size) {
         switch(type) {
@@ -131,33 +141,24 @@ namespace Kage {
         canva.Concat(_pkFont->DrawGlyph(kageStrokes));
     }
 
-    // Mirrors @kurgm/kage-engine Kage.makeGlyphSeparated: the input `data` is
-    // one Stroke per glyph line (references included).  Each line is expanded
-    // to its own strokes; all expanded strokes are drawn together (so that
-    // per-stroke adjustment sees the whole glyph as context), then contours
-    // are regrouped per original line.
-    std::vector<std::vector<Canva>> Kage::MakeGlyphSeparatedOut(
-        std::vector<Stroke> data) {
-        // 1. Expand each line once (GetStrokes(data) is the concatenation of
-        //    the per-line expansions) and remember how many strokes it gave.
+    std::vector<std::vector<Canva>> Kage::MakeGlyphSeparatedOut(std::vector<Stroke> data) {
         std::vector<Stroke> strokes;
         std::vector<size_t> counts;
         counts.reserve(data.size());
-        for(auto& line: data) {
-            auto expanded = GetStrokes(std::vector<Stroke>{line});
+        for(const auto& stroke: data) {
+            auto expanded = GetStrokes(std::vector<Stroke>{stroke});
             counts.push_back(expanded.size());
             strokes.insert(strokes.end(), expanded.begin(), expanded.end());
         }
-        // 2. Draw every expanded stroke into its own Canva, with the whole
-        //    glyph as adjustment context (same as DrawGlyph).
-        auto allCanvases = _pkFont->DrawGlyphSeparated(strokes);
-        // 3. Regroup into per-line buckets.
+
+        auto canvases = _pkFont->DrawGlyphSeparated(strokes);
         std::vector<std::vector<Canva>> result;
         result.reserve(counts.size());
-        auto it = allCanvases.begin();
-        for(size_t c: counts) {
-            result.emplace_back(it, it + c);
-            it += c;
+        auto canvas = canvases.begin();
+        for(size_t count: counts) {
+            auto next = canvas + count;
+            result.emplace_back(canvas, next);
+            canvas = next;
         }
         return result;
     }

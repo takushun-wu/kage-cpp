@@ -112,7 +112,7 @@ namespace Kage {
                 int t           = start % 100;
                 stroke.start    = (StartType)((100 + t) % 100);
                 stroke.startOpt = start / 100 - (t < 0);
-            } // Modified(2025/8/28)
+            }
             if((EndType)end == END_LOWER_LEFT_ZH_OLD ||
                 (EndType)end == END_LOWER_LEFT_ZH_NEW)
                 stroke.end = (EndType)end, stroke.endOpt = 0;
@@ -124,7 +124,7 @@ namespace Kage {
                     int t         = end % 100;
                     stroke.end    = (EndType)((100 + t) % 100);
                     stroke.endOpt = end / 100 - (t < 0);
-                } // Modified(2025/8/28)
+                }
             }
             stroke.p1 = Point(x1, y1), stroke.p2 = Point(x2, y2);
             if(strokeType == STROKE_CURVE || strokeType == STROKE_BENDING ||

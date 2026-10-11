@@ -64,8 +64,7 @@ namespace Kage {
         Mincho(double size = 0);
         ~Mincho() = default;
         Canva DrawGlyph(std::vector<Stroke> strokes) override;
-        std::vector<Canva> DrawGlyphSeparated(
-            std::vector<Stroke> strokes) override;
+        std::vector<Canva> DrawGlyphSeparated(std::vector<Stroke> strokes) override;
     };
 
 } // namespace Kage

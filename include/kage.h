@@ -2,6 +2,7 @@
 #define _KAGE_H
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 #include <thread>
@@ -44,14 +45,15 @@ namespace Kage {
         void PushBuhin(std::string name, std::vector<Stroke> data);
         void PushBuhin(std::string name, std::string data);
         std::vector<Stroke> SearchBuhin(std::string name);
+        bool DeleteBuhin(std::string name);
+        std::map<std::string, std::string> ExportBuhins();
 
         void                SetFont(KageFontType type, double size = 0);
         void                SetDBsearchCallback(DBsearchCallbackFunc callback);
         void                SetNotDefGlyph(std::vector<Stroke> glyph);
         void                MakeGlyph(Canva& canva, std::string buhin);
         void                MakeGlyph2(Canva& canva, std::vector<Stroke> data);
-        std::vector<std::vector<Canva>> MakeGlyphSeparatedOut(
-            std::vector<Stroke> data);
+        std::vector<std::vector<Canva>> MakeGlyphSeparatedOut(std::vector<Stroke> data);
         std::vector<Stroke> ExtractGlyph(std::string buhin);
         std::vector<Stroke> ExtractGlyph2(std::vector<Stroke> data);
         CheckGlyphState     CheckGlyph(std::string buhin);
